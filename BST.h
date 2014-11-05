@@ -203,13 +203,25 @@ Node<Key,T>* BST<Key,T>::find(Key k, Node<Key,T>* r){
 
 template <class Key, class T>
 Node<Key,T>* BST<Key,T>::max(Node<Key,T>* r){
-    //TODO
-    return NULL;
+    //The maximum value is always the bottom right of a subtree
+    //check to see if there are more to right, then return that
+    if(r->right == NULL) {
+        return r;
+    }
+    else {
+        return max(r->right);
+    }
 }
 
 template <class Key, class T>
 Node<Key,T>* BST<Key,T>::min(Node<Key,T>* r){
-    //TODO
-    return NULL;
+    //The minimum value is always the bottom left of a subtree
+    //check to see if there are more to left, then return that
+    if(r->left == NULL) {
+        return r;
+    }
+    else {
+        return min(r->left);
+    }
 }
 
