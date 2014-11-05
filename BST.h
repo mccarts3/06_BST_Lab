@@ -171,42 +171,148 @@ bool BST<Key,T>::keyExists(Key k){
 // return the first such key. If not, return k
 template <class Key, class T>
 Key BST<Key,T>::next(Key k){
-    //TODO
-    Key fakeKey;
-    return fakeKey;
+    Node* tempNode = next(k, root);
+    
+    if(tempNode == NULL) {
+        return k;
+    }
+    else {
+        return tempNode->k;
+    }
 }
 
 template <class Key, class T>
 Node<Key,T>* BST<Key,T>::next(Key k, Node<Key,T>* r){
-    //TODO
-    return NULL;
+    if(r == NULL) {
+        return NULL;
+    }
+    else if(k == r->k) {
+        //all nodes r->right are larger, look for the next smallest
+        return min(r->right);
+    }
+    else if(k < r->k) {
+        //keep looking for k == r->k
+        return next(k, r->left);
+    }
+    else {
+        //keep looking for k == r->k
+        return next(k, r->right);
+    }
 }
 
 //If there is a key in the set that is < k,
 // return the first such key. If not, return k
 template <class Key, class T>
 Key BST<Key,T>::prev(Key k){
-    //TODO
-    return NULL;
+    Node* tempNode = prev(k, root);
+    
+    if(tempNode == NULL) {
+        return k;
+    }
+    else {
+        return tempNode->k;
+    }
+
 }
 
 template <class Key, class T>
 Node<Key,T>* BST<Key,T>::prev(Key k, Node<Key,T>* r){
-    //TODO
-    return NULL;
+    if(r == NULL) {
+        return NULL;
+    }
+    else if(k == r->k) {
+        //all nodes r->left are smaller, look for the previous largest
+        return max(r->left);
+    }
+    else if(k < r->k) {
+        //keep looking for k == r->k
+        return prev(k, r->left);
+    }
+    else {
+        //keep looking for k == r->k
+        return prev(k, r->right);
+    }
 }
 
 
 template <class Key, class T>
 Node<Key,T>* BST<Key,T>::add(Key k, T x, Node<Key,T>* r){
-    //TODO
-    return NULL;
+    if(root == NULL) {
+        //Only done for the first node, makes it the root
+        root->k = k;
+        root->data = x;
+        return root;
+    }
+    else if(keyExists(k) == true) {
+        //key already exists, replace it with the data 'x'
+        Node* tempNode = find(k, root);
+        tempNode->data = x;
+        return tempNode;
+    }
+    else if(r == NULL) {
+        //Root is already null, create new node and return it
+        Node<Key, T>* newNode = new Node<Key, T>;
+        return newNode;
+    }
+    else if(k < r->k) {
+        //The key is less than the current node, add to the left child
+        add(k, x, r->left);
+    }
+    else {
+        //The key is greater than the current node, add to the right child
+        add(k, x, r->right);
+    }
 }
 
 template <class Key, class T>
 Node<Key,T>* BST<Key,T>::remove(Key k, Node<Key,T>* r){
-    //TODO
-    return NULL;
+    if(keyExists(k) == false) {
+        throw std::string("In remove(), tried to remove a non-existent node");
+    }
+    else if(r->k == k) {
+        //Found the node to delete, now more cases
+        
+        if(r->left == NULL && r->right == NULL) {
+            //The node has no children, can just delete it and return the
+            //now NULL node
+            delete r;
+            return NULL;
+        }
+        else if(r->left != NULL) {
+            //The returned node/new root node for the subtree
+            //should be the max of the left in this case
+            //Swap the nodes and then delete the now max node
+            Node<Key, T>* newNode = max(r->left);
+            Key tempKey = newNode->k;
+            T tempData = newNode->data;
+            
+            newNode->k = r->k;
+            r->k = tempKey;
+            
+            newNode->data = r->data;
+            r->data = tempData;
+            
+            //Eventually finds and removes the swapped node
+            //we initially wanted to remove
+            r->left = remove(k, r->left);
+            return r;
+        }
+        else {
+            //There are no children to the left, delete the node
+            //and return newNode as the new reference child
+            Node<Key, T>* newNode = r->right;
+            delete r;
+            return newNode;
+        }
+    }
+    else if(k < r->k) {
+        //Look for r->k == k node
+        remove(k, r->left);
+    }
+    else {
+        //Look for r-k == k node
+        remove(k, r->right);
+    }
 }
 
 //Recursive way of finding a key, returns the node, returns
@@ -218,6 +324,7 @@ Node<Key,T>* BST<Key,T>::find(Key k, Node<Key,T>* r){
         return NULL;
     }
     else if(r->k == k) {
+        //Found it, return it
         return r;
     }
     else if(k < r->k) {
