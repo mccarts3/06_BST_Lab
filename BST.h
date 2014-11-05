@@ -128,29 +128,43 @@ unsigned long BST<Key,T>::size(Node<Key,T>* r){
 // If an item with Key k already exists, overwrite it
 template <class Key, class T>
 void BST<Key,T>::add(Key k, T x){
-    //TODO
+    //This is the public add() method, must call the private add()
+    //and add it in reference to the entire BST, no subtree
+    add(k, x, root);
 }
 
 //Remove the item with Key k. If there is no such item, do nothing.
 template <class Key, class T>
 void BST<Key,T>::remove(Key k){
-    //TODO
+    //Calls the private remove() method, with the root node
+    //as the starting reference point
+    remove(k, root);
 }
 
 //Return the item with Key k.
 // If there is no such item, throw an exception.
 template <class Key, class T>
 T BST<Key,T>::find(Key k){
-    //TODO
-    T fakeT;
-    return fakeT;
+    Node* tempNode = find(k, root);
+    
+    //returns the T data, not the node
+    return tempNode->data;
 }
+
 //Return true if there is an item with Key k in the table. If not,
 // return false
 template <class Key, class T>
 bool BST<Key,T>::keyExists(Key k){
-    //TODO
-    return false;
+    //COME BACK TO THIS, if find returns null, can I try to
+    //access its 'k' value? Would it be null?
+    Node* tempNode = find(k, root);
+    
+    if(tempNode->k == k) {
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 //If there is a key in the set that is > k,
@@ -195,10 +209,23 @@ Node<Key,T>* BST<Key,T>::remove(Key k, Node<Key,T>* r){
     return NULL;
 }
 
+//Recursive way of finding a key, returns the node, returns
+//null if the </> tests lead to a null node.  The first
+//node that is passed is the root from the public function
 template <class Key, class T>
 Node<Key,T>* BST<Key,T>::find(Key k, Node<Key,T>* r){
-    //TODO
-    return NULL;
+    if(r == NULL) {
+        return NULL;
+    }
+    else if(r->k == k) {
+        return r;
+    }
+    else if(k < r->k) {
+        return find(k, r->left);
+    }
+    else {
+        return find(k, r->right);
+    }
 }
 
 template <class Key, class T>
