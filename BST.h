@@ -94,6 +94,7 @@ template <class Key, class T>
 Node<Key, T>* BST<Key,T>::removeAll(Node<Key, T>* r) {
     //Base case: No nodes connected to it
     if(r->left == NULL && r->right == NULL) {
+        r = NULL;
         delete r;
     }
     //Case 1: There is a node to the left
@@ -104,6 +105,9 @@ Node<Key, T>* BST<Key,T>::removeAll(Node<Key, T>* r) {
     else {
         return removeAll(r->right);
     }
+    
+    //In case the node isn't found (shouldn't be used, just for compiling)
+    return NULL;
 }
 
 //Return the number of items currently in the SSet
@@ -130,7 +134,9 @@ template <class Key, class T>
 void BST<Key,T>::add(Key k, T x){
     //This is the public add() method, must call the private add()
     //and add it in reference to the entire BST, no subtree
-    add(k, x, root);
+    root = add(k, x, root);
+    
+    //add(k, x, root);
 }
 
 //Remove the item with Key k. If there is no such item, do nothing.
@@ -138,40 +144,38 @@ template <class Key, class T>
 void BST<Key,T>::remove(Key k){
     //Calls the private remove() method, with the root node
     //as the starting reference point
-    remove(k, root);
+    root = remove(k, root);
+    
+    //remove(k, root);
 }
 
-//Return the item with Key k.
+// Return the item with Key k.
 // If there is no such item, throw an exception.
 template <class Key, class T>
 T BST<Key,T>::find(Key k){
-    Node* tempNode = find(k, root);
+    Node<Key, T>* tempNode = find(k, root);
     
-    //returns the T data, not the node
-    return tempNode->data;
+    if(tempNode == NULL) {
+        throw std::string("In find(), given a key not found in the table.");
+    }
+    else{
+        //returns the T data, not the node
+        return tempNode->data;
+    }
 }
 
-//Return true if there is an item with Key k in the table. If not,
-// return false
+// Return true if Key k is found in the table. If k is
+// not found and is NULL, return false
 template <class Key, class T>
 bool BST<Key,T>::keyExists(Key k){
-    //COME BACK TO THIS, if find returns null, can I try to
-    //access its 'k' value? Would it be null?
-    Node* tempNode = find(k, root);
-    
-    if(tempNode->k == k) {
-        return true;
-    }
-    else {
-        return false;
-    }
+    return find(k, root) != NULL;
 }
 
-//If there is a key in the set that is > k,
+// If there is a key in the set that is > k,
 // return the first such key. If not, return k
 template <class Key, class T>
 Key BST<Key,T>::next(Key k){
-    Node* tempNode = next(k, root);
+    Node<Key, T>* tempNode = next(k, root);
     
     if(tempNode == NULL) {
         return k;
@@ -183,20 +187,19 @@ Key BST<Key,T>::next(Key k){
 
 template <class Key, class T>
 Node<Key,T>* BST<Key,T>::next(Key k, Node<Key,T>* r){
-    if(r == NULL) {
-        return NULL;
-    }
-    else if(k == r->k) {
+    if(r == NULL) { return NULL;    }
+    
+    if(r->k == k) {
         //all nodes r->right are larger, look for the next smallest
         return min(r->right);
     }
-    else if(k < r->k) {
+    else if(r->k < k) {
         //keep looking for k == r->k
-        return next(k, r->left);
+        return next(k, r->right);
     }
     else {
         //keep looking for k == r->k
-        return next(k, r->right);
+        return next(k, r->left);
     }
 }
 
@@ -204,7 +207,7 @@ Node<Key,T>* BST<Key,T>::next(Key k, Node<Key,T>* r){
 // return the first such key. If not, return k
 template <class Key, class T>
 Key BST<Key,T>::prev(Key k){
-    Node* tempNode = prev(k, root);
+    Node<Key, T>* tempNode = prev(k, root);
     
     if(tempNode == NULL) {
         return k;
@@ -217,20 +220,19 @@ Key BST<Key,T>::prev(Key k){
 
 template <class Key, class T>
 Node<Key,T>* BST<Key,T>::prev(Key k, Node<Key,T>* r){
-    if(r == NULL) {
-        return NULL;
-    }
-    else if(k == r->k) {
+    if(r == NULL) { return NULL;    }
+    
+    if(r->k == k) {
         //all nodes r->left are smaller, look for the previous largest
         return max(r->left);
     }
-    else if(k < r->k) {
+    else if(r->k < k) {
         //keep looking for k == r->k
-        return prev(k, r->left);
+        return prev(k, r->right);
     }
     else {
         //keep looking for k == r->k
-        return prev(k, r->right);
+        return prev(k, r->left);
     }
 }
 
@@ -243,24 +245,36 @@ Node<Key,T>* BST<Key,T>::add(Key k, T x, Node<Key,T>* r){
         root->data = x;
         return root;
     }
-    else if(keyExists(k) == true) {
-        //key already exists, replace it with the data 'x'
-        Node* tempNode = find(k, root);
-        tempNode->data = x;
-        return tempNode;
-    }
     else if(r == NULL) {
-        //Root is already null, create new node and return it
-        Node<Key, T>* newNode = new Node<Key, T>;
-        return newNode;
+        r = new Node<Key, T>();
+        
+        r->k = k;
+        r->data = x;
+        r->left = NULL;
+        r->right = NULL;
+        
+        return r;
+    }
+    else if(r->k == k) {
+        //key already exists, replace it with the data 'x', then return the node
+        r->data = x;
+        return r;
     }
     else if(k < r->k) {
         //The key is less than the current node, add to the left child
-        add(k, x, r->left);
+        //then link that new node to the current
+        Node<Key, T>* tempNode = add(k, x, r->left);
+        r->left = tempNode;
+        
+        return r->left;
     }
     else {
         //The key is greater than the current node, add to the right child
-        add(k, x, r->right);
+        //then link that new node to the current
+        Node<Key, T>* tempNode = add(k, x, r->right);
+        r->right = tempNode;
+        
+        return r->right;
     }
 }
 
@@ -269,7 +283,8 @@ Node<Key,T>* BST<Key,T>::remove(Key k, Node<Key,T>* r){
     if(keyExists(k) == false) {
         throw std::string("In remove(), tried to remove a non-existent node");
     }
-    else if(r->k == k) {
+    
+    if(r->k == k) {
         //Found the node to delete, now more cases
         
         if(r->left == NULL && r->right == NULL) {
@@ -278,31 +293,31 @@ Node<Key,T>* BST<Key,T>::remove(Key k, Node<Key,T>* r){
             delete r;
             return NULL;
         }
-        else if(r->left != NULL) {
-            //The returned node/new root node for the subtree
-            //should be the max of the left in this case
-            //Swap the nodes and then delete the now max node
-            Node<Key, T>* newNode = max(r->left);
-            Key tempKey = newNode->k;
-            T tempData = newNode->data;
+        else if(r->right != NULL) {
+            Node<Key, T>* tempNode = min(r->right);
+            //Used to find the key of the node to be deleted later
+            Key deleteKey = tempNode->k;
             
-            newNode->k = r->k;
-            r->k = tempKey;
+            //Will delete this because this node has no children
+            remove(deleteKey, r);
             
-            newNode->data = r->data;
-            r->data = tempData;
+            r->k = tempNode->k;
+            r->data = tempNode->data;
             
-            //Eventually finds and removes the swapped node
-            //we initially wanted to remove
-            r->left = remove(k, r->left);
             return r;
         }
         else {
-            //There are no children to the left, delete the node
-            //and return newNode as the new reference child
-            Node<Key, T>* newNode = r->right;
-            delete r;
-            return newNode;
+            Node<Key, T>* tempNode = max(r->left);
+            //Used to find the key of the node to be deleted later
+            Key deleteKey = tempNode->k;
+            
+            //Will delete this because this node has no children
+            remove(deleteKey, r);
+            
+            r->k = tempNode->k;
+            r->data = tempNode->data;
+            
+            return r;
         }
     }
     else if(k < r->k) {
@@ -310,9 +325,12 @@ Node<Key,T>* BST<Key,T>::remove(Key k, Node<Key,T>* r){
         remove(k, r->left);
     }
     else {
-        //Look for r-k == k node
+        //Look for r->k == k node
         remove(k, r->right);
     }
+    
+    //In case the node isn't found (shouldn't be used, just for compiling)
+    return NULL;
 }
 
 //Recursive way of finding a key, returns the node, returns
@@ -339,6 +357,9 @@ template <class Key, class T>
 Node<Key,T>* BST<Key,T>::max(Node<Key,T>* r){
     //The maximum value is always the bottom right of a subtree
     //check to see if there are more to right, then return that
+    if(r == NULL) {
+        throw std::string("In min(), a NULL node was passed as a parameter.");
+    }
     if(r->right == NULL) {
         return r;
     }
@@ -351,6 +372,9 @@ template <class Key, class T>
 Node<Key,T>* BST<Key,T>::min(Node<Key,T>* r){
     //The minimum value is always the bottom left of a subtree
     //check to see if there are more to left, then return that
+    if(r == NULL) {
+        throw std::string("In min(), a NULL node was passed as a parameter.");
+    }
     if(r->left == NULL) {
         return r;
     }
