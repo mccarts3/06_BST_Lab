@@ -266,7 +266,7 @@ Node<Key,T>* BST<Key,T>::add(Key k, T x, Node<Key,T>* r){
         Node<Key, T>* tempNode = add(k, x, r->left);
         r->left = tempNode;
         
-        return r->left;
+        return r;
     }
     else {
         //The key is greater than the current node, add to the right child
@@ -274,7 +274,7 @@ Node<Key,T>* BST<Key,T>::add(Key k, T x, Node<Key,T>* r){
         Node<Key, T>* tempNode = add(k, x, r->right);
         r->right = tempNode;
         
-        return r->right;
+        return r;
     }
 }
 
