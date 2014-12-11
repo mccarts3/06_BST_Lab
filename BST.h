@@ -1,6 +1,12 @@
 //DO NOT CHANGE THIS FILE
 //Author: Bo Brinkman
 //Date: 2013/10/01
+/*
+ * Author 2: Scott McCartney
+ * Date 2: 2014/12/10
+ * All code was written by me, with a reference to
+ * http://www.cplusplus.com/reference/set/set/ used
+ */
 
 #include "SSet.h"
 
@@ -135,9 +141,7 @@ void BST<Key,T>::add(Key k, T x){
     //This is the public add() method, must call the private add()
     //and add it in reference to the entire BST, no subtree
     
-    //root = add(k, x, root);
-    
-    add(k, x, root);
+    root = add(k, x, root);
 }
 
 //Remove the item with Key k. If there is no such item, do nothing.
@@ -241,13 +245,7 @@ Node<Key,T>* BST<Key,T>::prev(Key k, Node<Key,T>* r){
 
 template <class Key, class T>
 Node<Key,T>* BST<Key,T>::add(Key k, T x, Node<Key,T>* r){
-    if(root == NULL) {
-        //Only done for the first node, makes it the root
-        root->k = k;
-        root->data = x;
-        return root;
-    }
-    else if(r == NULL) {
+    if(r == NULL) {
         r = new Node<Key, T>();
         
         r->k = k;
