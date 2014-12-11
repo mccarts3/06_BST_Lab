@@ -181,6 +181,8 @@ bool BST<Key,T>::keyExists(Key k){
 // return the first such key. If not, return k
 template <class Key, class T>
 Key BST<Key,T>::next(Key k){
+    //This causes an error!!  next(k, root) works, but when
+    //attempting to assign that node to a tempNode, program crashes
     Node<Key, T>* tempNode = next(k, root);
     
     if(tempNode == NULL) {
@@ -265,6 +267,7 @@ Node<Key,T>* BST<Key,T>::add(Key k, T x, Node<Key,T>* r){
         //then link that new node to the current
         Node<Key, T>* tempNode = add(k, x, r->left);
         r->left = tempNode;
+        
         
         return r;
     }
